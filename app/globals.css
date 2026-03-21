@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+:root {
+  --background: #020617;
+  --foreground: #e2e8f0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Custom scrollbar for dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Selection color */
+::selection {
+  background: rgba(99, 102, 241, 0.3);
+  color: #e2e8f0;
+}
+
+/* React Big Calendar Dark Theme Overrides */
+.rbc-calendar {
+  background: transparent;
+  color: #e2e8f0;
+}
+
+.rbc-header {
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  padding: 8px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.rbc-month-view {
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.rbc-month-row {
+  border-bottom: 1px solid #1e293b;
+}
+
+.rbc-day-bg {
+  background: #0f172a;
+  border-right: 1px solid #1e293b;
+}
+
+.rbc-day-bg.rbc-today {
+  background: rgba(99, 102, 241, 0.1);
+}
+
+.rbc-date-cell {
+  padding: 4px 8px;
+  color: #cbd5e1;
+}
+
+.rbc-date-cell.rbc-now {
+  color: #818cf8;
+  font-weight: 600;
+}
+
+.rbc-off-range-bg {
+  background: #020617;
+}
+
+.rbc-off-range {
+  color: #475569;
+}
+
+.rbc-event {
+  border-radius: 4px;
+  border: none;
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+}
+
+.rbc-event-content {
+  font-size: 0.75rem;
+}
+
+.rbc-time-view {
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+}
+
+.rbc-time-header {
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+}
+
+.rbc-time-content {
+  background: #0f172a;
+}
+
+.rbc-time-slot {
+  color: #64748b;
+}
+
+.rbc-today {
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.rbc-button-link {
+  color: inherit;
+}
+
+.rbc-show-more {
+  color: #818cf8;
+  font-size: 0.75rem;
+}
+
+.rbc-row-segment {
+  padding: 0 2px;
+}
+
+/* Week and Day view styles */
+.rbc-time-header-content {
+  border-left: 1px solid #1e293b;
+}
+
+.rbc-time-column {
+  background: #0f172a;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid #1e293b;
+}
+
+.rbc-day-slot .rbc-time-slot {
+  border-top: 1px solid #1e293b;
+}
+
+.rbc-current-time-indicator {
+  background: #ef4444;
+  height: 2px;
+}

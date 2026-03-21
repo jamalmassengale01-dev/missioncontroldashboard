@@ -1,0 +1,39 @@
+{
+  "name": "mission-control",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.80.0",
+    "@hello-pangea/dnd": "^18.0.1",
+    "@supabase/supabase-js": "^2.99.3",
+    "@types/node-telegram-bot-api": "^0.64.14",
+    "bullmq": "^5.71.0",
+    "date-fns": "^4.1.0",
+    "ioredis": "^5.10.1",
+    "jose": "^6.2.2",
+    "lucide-react": "^0.577.0",
+    "next": "16.2.1",
+    "node-telegram-bot-api": "^0.67.0",
+    "openai": "^6.32.0",
+    "react": "19.2.4",
+    "react-big-calendar": "^1.19.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-big-calendar": "^1.16.3",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
