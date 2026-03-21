@@ -1,0 +1,10 @@
+node_modules
+.next
+*.log
+.cache
+.vscode
+.idea
+.DS_Store
+*.swp
+*.swo
+*~
