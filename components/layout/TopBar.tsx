@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell, Search, Check, X } from 'lucide-react';
-import { Button } from './Button';
+import { Button } from '@/components/ui/Button';
 
 interface TopBarProps {
   title: string;
