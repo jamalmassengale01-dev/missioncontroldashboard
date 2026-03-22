@@ -1,4 +1,3 @@
-import { timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
 import { SignJWT, jwtVerify } from 'jose';
 import { getAuthConfig } from './config';
@@ -16,10 +15,13 @@ function resolvePassword(): string {
 }
 
 function safeCompare(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
+  const encoder = new TextEncoder();
+  const bufA = encoder.encode(a);
+  const bufB = encoder.encode(b);
   if (bufA.length !== bufB.length) return false;
-  return timingSafeEqual(bufA, bufB);
+  let result = 0;
+  for (let i = 0; i < bufA.length; i++) result |= bufA[i] ^ bufB[i];
+  return result === 0;
 }
 
 export interface Session {
