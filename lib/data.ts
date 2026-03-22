@@ -131,6 +131,99 @@ export const agents: Agent[] = [
 ];
 
 export const tasks: Task[] = [
+  // $100 Revenue Sprint - Trading Products
+  {
+    id: 'task-rs-1',
+    title: 'Research trader pain points on Reddit',
+    description: 'Scan Reddit communities, identify top 10 discipline problems traders mention, summarize common frustrations',
+    assignedAgent: 'DeepForge',
+    priority: 'High',
+    dueDate: '2026-03-25',
+    project: '$100 Revenue Sprint - Trading Products',
+    status: 'Backlog',
+    activityLog: [
+      { id: 'rs1-1', timestamp: '2026-03-22T09:00:00Z', action: 'Task created', agent: 'EdgePilot' },
+    ],
+  },
+  {
+    id: 'task-rs-2',
+    title: 'Create Prop Firm Discipline Checklist PDF',
+    description: 'Generate checklist content with 5 sections: Pre-Trade, Risk Management, Discipline, Post-Trade Review, Weekly Review. Format as clean PDF.',
+    assignedAgent: 'ScriptForge',
+    priority: 'High',
+    dueDate: '2026-03-27',
+    project: '$100 Revenue Sprint - Trading Products',
+    status: 'Backlog',
+    activityLog: [
+      { id: 'rs2-1', timestamp: '2026-03-22T09:00:00Z', action: 'Task created', agent: 'EdgePilot' },
+    ],
+  },
+  {
+    id: 'task-rs-3',
+    title: 'Build Pine Script indicator for trading discipline',
+    description: 'Create simple Pine Script tool: session high/low marker, risk calculator overlay, or daily max loss visual line. Keep it simple and stable.',
+    assignedAgent: 'BuildForge',
+    priority: 'High',
+    dueDate: '2026-03-28',
+    project: '$100 Revenue Sprint - Trading Products',
+    status: 'Backlog',
+    activityLog: [
+      { id: 'rs3-1', timestamp: '2026-03-22T09:00:00Z', action: 'Task created', agent: 'EdgePilot' },
+    ],
+  },
+  {
+    id: 'task-rs-4',
+    title: 'Design checklist PDF layout',
+    description: 'Format checklist into clean PDF with simple typography and minimal visual styling. Easy to print.',
+    assignedAgent: 'GrowthForge',
+    priority: 'Medium',
+    dueDate: '2026-03-28',
+    project: '$100 Revenue Sprint - Trading Products',
+    status: 'Backlog',
+    activityLog: [
+      { id: 'rs4-1', timestamp: '2026-03-22T09:00:00Z', action: 'Task created', agent: 'EdgePilot' },
+    ],
+  },
+  {
+    id: 'task-rs-5',
+    title: 'Write product listings for Gumroad/LemonSqueezy',
+    description: 'Create product descriptions: problem, solution, benefits, who it helps, what is included. Target $9 for checklist, $19-29 for indicator.',
+    assignedAgent: 'SignalForge',
+    priority: 'Medium',
+    dueDate: '2026-03-29',
+    project: '$100 Revenue Sprint - Trading Products',
+    status: 'Backlog',
+    activityLog: [
+      { id: 'rs5-1', timestamp: '2026-03-22T09:00:00Z', action: 'Task created', agent: 'EdgePilot' },
+    ],
+  },
+  {
+    id: 'task-rs-6',
+    title: 'Create social media content for launch',
+    description: 'Write 5 Reddit posts, 5 tweets, 3 educational threads. Topics: why traders fail, discipline importance, common prop firm mistakes, risk management, structure benefits.',
+    assignedAgent: 'SignalForge',
+    priority: 'Medium',
+    dueDate: '2026-03-30',
+    project: '$100 Revenue Sprint - Trading Products',
+    status: 'Backlog',
+    activityLog: [
+      { id: 'rs6-1', timestamp: '2026-03-22T09:00:00Z', action: 'Task created', agent: 'EdgePilot' },
+    ],
+  },
+  {
+    id: 'task-rs-7',
+    title: 'Execute launch and track metrics',
+    description: 'Post content to Reddit and Twitter. Track clicks, comments, questions, interest. Target: 10 checklist sales OR 3 indicator sales OR 25 email subscribers.',
+    assignedAgent: 'EdgePilot',
+    priority: 'High',
+    dueDate: '2026-04-02',
+    project: '$100 Revenue Sprint - Trading Products',
+    status: 'Backlog',
+    activityLog: [
+      { id: 'rs7-1', timestamp: '2026-03-22T09:00:00Z', action: 'Task created', agent: 'EdgePilot' },
+    ],
+  },
+  // Existing tasks
   {
     id: 'task-1',
     title: 'Design system architecture for trading bot',
@@ -300,6 +393,24 @@ export const tasks: Task[] = [
 ];
 
 export const projectsData: Project[] = [
+  {
+    id: 'proj-rs-100',
+    name: '$100 Revenue Sprint - Trading Products',
+    description: 'Rapid sprint to generate first $100 in revenue through trading-related digital products: discipline checklist PDF and Pine Script indicator.',
+    progress: 0,
+    status: 'Active',
+    linkedTaskCount: 7,
+    linkedDocumentCount: 0,
+    milestones: [
+      { id: 'm-rs-1', title: 'Research Complete', completed: false, dueDate: '2026-03-25' },
+      { id: 'm-rs-2', title: 'Products Created', completed: false, dueDate: '2026-03-29' },
+      { id: 'm-rs-3', title: 'Marketing Ready', completed: false, dueDate: '2026-03-31' },
+      { id: 'm-rs-4', title: 'Launch Executed', completed: false, dueDate: '2026-04-02' },
+    ],
+    lastUpdated: '2026-03-22T09:00:00Z',
+    createdAt: '2026-03-22T09:00:00Z',
+    category: 'Business',
+  },
   {
     id: 'proj-1',
     name: 'Trading Systems',
@@ -763,5 +874,5 @@ export const decisionQueue: DecisionItem[] = [
   },
 ];
 
-export const projects = ['Trading Systems', 'Trading Research', 'Content Engine', 'Automation Systems', 'SaaS MVPs', 'AI Tools'];
+export const projects = ['$100 Revenue Sprint - Trading Products', 'Trading Systems', 'Trading Research', 'Content Engine', 'Automation Systems', 'SaaS MVPs', 'AI Tools'];
 export const agentNames = ['Chief Architect', 'EdgePilot', 'DeepForge', 'ScriptForge', 'GrowthForge', 'BuildForge', 'SignalForge', 'Haven'];
