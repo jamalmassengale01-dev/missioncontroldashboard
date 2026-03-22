@@ -19,16 +19,17 @@ import {
 } from 'lucide-react';
 import { Button } from '../ui/Button';
 
+// Reorganized nav items per requirements
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Chief Architect', href: '/architect', icon: Crown },
+  { name: 'Operations', href: '/operations', icon: Settings },
   { name: 'Task Board', href: '/tasks', icon: KanbanSquare },
   { name: 'Team', href: '/team', icon: Users },
   { name: 'Projects', href: '/projects', icon: FolderKanban },
   { name: 'Calendar', href: '/calendar', icon: Calendar },
-  { name: 'Chief Architect', href: '/architect', icon: Crown },
   { name: 'Memory', href: '/memory', icon: Brain },
   { name: 'Documents', href: '/documents', icon: FileText },
-  { name: 'Operations', href: '/operations', icon: Settings },
 ];
 
 export function Sidebar() {
@@ -92,9 +93,16 @@ export function Sidebar() {
             })}
           </nav>
 
-          {/* Footer */}
+          {/* Footer - Changed to Settings */}
           <div className="px-6 py-4 border-t border-slate-800">
-            <div className="flex items-center gap-3">
+            <Link 
+              href="/settings"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-colors"
+            >
+              <Settings className="w-5 h-5" />
+              <span>Settings</span>
+            </Link>
+            <div className="flex items-center gap-3 mt-4">
               <div className="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
                 JA
               </div>

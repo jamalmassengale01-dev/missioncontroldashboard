@@ -3,12 +3,14 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { Document, DocumentCategory } from '@/lib/types';
-import { FileText, Calendar, Folder } from 'lucide-react';
+import { FileText, Calendar, Folder, Trash2 } from 'lucide-react';
 
 interface DocumentCardProps {
   document: Document;
   onClick?: () => void;
+  onDelete?: () => void;
 }
 
 const categoryColors: Record<DocumentCategory, string> = {
@@ -19,9 +21,16 @@ const categoryColors: Record<DocumentCategory, string> = {
   Research: 'default',
 };
 
-export function DocumentCard({ document, onClick }: DocumentCardProps) {
+export function DocumentCard({ document, onClick, onDelete }: DocumentCardProps) {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete();
+    }
+  };
+
   return (
-    <Card onClick={onClick} className="p-5 hover:border-indigo-500/30 transition-all cursor-pointer">
+    <Card onClick={onClick} className="p-5 hover:border-indigo-500/30 transition-all cursor-pointer group">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
@@ -29,6 +38,16 @@ export function DocumentCard({ document, onClick }: DocumentCardProps) {
           </div>
           <h3 className="font-semibold text-slate-100 line-clamp-1">{document.title}</h3>
         </div>
+        {onDelete && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleDelete}
+          >
+            <Trash2 className="w-4 h-4 text-red-400" />
+          </Button>
+        )}
       </div>
 
       {/* Category */}

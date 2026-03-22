@@ -3,12 +3,14 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { MemoryEntry as MemoryEntryType, MemoryTag } from '@/lib/types';
-import { Brain, Calendar } from 'lucide-react';
+import { Brain, Calendar, Trash2 } from 'lucide-react';
 
 interface MemoryEntryProps {
   entry: MemoryEntryType;
   onClick?: () => void;
+  onDelete?: () => void;
 }
 
 const tagColors: Record<MemoryTag, string> = {
@@ -19,9 +21,16 @@ const tagColors: Record<MemoryTag, string> = {
   Decisions: 'default',
 };
 
-export function MemoryEntry({ entry, onClick }: MemoryEntryProps) {
+export function MemoryEntry({ entry, onClick, onDelete }: MemoryEntryProps) {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete();
+    }
+  };
+
   return (
-    <Card onClick={onClick} className="p-5 hover:border-indigo-500/30 transition-all cursor-pointer">
+    <Card onClick={onClick} className="p-5 hover:border-indigo-500/30 transition-all cursor-pointer group">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
@@ -29,6 +38,16 @@ export function MemoryEntry({ entry, onClick }: MemoryEntryProps) {
           </div>
           <h3 className="font-semibold text-slate-100 line-clamp-1">{entry.title}</h3>
         </div>
+        {onDelete && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={handleDelete}
+          >
+            <Trash2 className="w-4 h-4 text-red-400" />
+          </Button>
+        )}
       </div>
 
       <p className="text-sm text-slate-400 mb-4 line-clamp-2">{entry.summary}</p>

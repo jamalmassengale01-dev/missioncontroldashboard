@@ -5,11 +5,12 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { AgentCard } from '@/components/team/AgentCard';
 import { MissionStatement } from '@/components/team/MissionStatement';
+import { TaskModal } from '@/components/tasks/TaskModal';
 import { getAllAgents, AgentConfig } from '@/lib/agents/registry';
 import { workflowStore } from '@/lib/store/workflowStore';
 import { getWorkflowsByAgent } from '@/lib/workflows/definitions';
 import { executeWorkflow } from '@/lib/agents/executor';
-import { WorkflowRun } from '@/lib/types';
+import { WorkflowRun, Task } from '@/lib/types';
 import { Button } from '@/components/ui/Button';
 import { 
   Play, 
@@ -25,6 +26,10 @@ export default function TeamPage() {
   const [agentRuns, setAgentRuns] = useState<Record<string, WorkflowRun[]>>({});
   const [executingAgent, setExecutingAgent] = useState<string | null>(null);
   const [isClient, setIsClient] = useState(false);
+  
+  // Task modal state
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedAgentForTask, setSelectedAgentForTask] = useState<string>('');
 
   useEffect(() => {
     setIsClient(true);
@@ -109,6 +114,17 @@ export default function TeamPage() {
     }
   };
 
+  const handleAssignTask = (agentId: string) => {
+    setSelectedAgentForTask(agentId);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleSaveTask = (task: Task) => {
+    // In a real app, this would save to a backend
+    console.log('Task created:', task);
+    setIsTaskModalOpen(false);
+  };
+
   const getAgentStatus = (agent: AgentConfig) => {
     const runs = agentRuns[agent.id] || [];
     const activeRun = runs.find(r => ['running', 'queued', 'assigned'].includes(r.status));
@@ -168,19 +184,22 @@ export default function TeamPage() {
                   
                   return (
                     <div key={agent.id} className="relative">
-                      <AgentCard agent={{
-                        id: agent.id,
-                        name: agent.displayName,
-                        role: agent.role,
-                        status: agentStatus.status as any,
-                        currentFocus: agentStatus.runId 
-                          ? `Working on: ${agentRuns[agent.id]?.find(r => r.id === agentStatus.runId)?.workflowName || 'Task'}`
-                          : 'Available for assignments',
-                        lastActivity: agentStatus.runId
-                          ? new Date(agentRuns[agent.id]?.find(r => r.id === agentStatus.runId)?.startedAt || '').toLocaleTimeString()
-                          : 'Idle',
-                        capabilities: agent.capabilities,
-                      }} />
+                      <AgentCard 
+                        agent={{
+                          id: agent.id,
+                          name: agent.displayName,
+                          role: agent.role,
+                          status: agentStatus.status as any,
+                          currentFocus: agentStatus.runId 
+                            ? `Working on: ${agentRuns[agent.id]?.find(r => r.id === agentStatus.runId)?.workflowName || 'Task'}`
+                            : 'Available for assignments',
+                          lastActivity: agentStatus.runId
+                            ? new Date(agentRuns[agent.id]?.find(r => r.id === agentStatus.runId)?.startedAt || '').toLocaleTimeString()
+                            : 'Idle',
+                          capabilities: agent.capabilities,
+                        }} 
+                        onAssignTask={() => handleAssignTask(agent.id)}
+                      />
                       
                       {/* Quick Action Button */}
                       <div className="absolute top-4 right-4">
@@ -240,6 +259,14 @@ export default function TeamPage() {
           </div>
         </main>
       </div>
+
+      {/* Task Modal for Assigning Tasks */}
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => setIsTaskModalOpen(false)}
+        onSave={handleSaveTask}
+        defaultAgent={selectedAgentForTask}
+      />
     </div>
   );
 }

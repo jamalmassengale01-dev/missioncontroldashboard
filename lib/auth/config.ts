@@ -8,7 +8,7 @@ export interface AuthConfig {
 
 // Default auth configuration
 export const defaultAuthConfig: AuthConfig = {
-  enabled: process.env.AUTH_ENABLED === 'true',
+  enabled: false, // DISABLED for now - set to true to enable auth
   mode: (process.env.AUTH_MODE as AuthConfig['mode']) || 'local',
   secretKey: process.env.AUTH_SECRET_KEY || 'mission-control-default-secret-key-change-in-production',
   sessionDuration: parseInt(process.env.AUTH_SESSION_DURATION || '86400', 10), // 24 hours

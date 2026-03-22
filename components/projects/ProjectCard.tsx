@@ -3,12 +3,14 @@
 import React from 'react';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
 import { Project } from '@/lib/types';
-import { CheckCircle2, Circle, FileText, ListTodo } from 'lucide-react';
+import { CheckCircle2, Circle, FileText, ListTodo, Trash2 } from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
   onClick: () => void;
+  onDelete?: () => void;
 }
 
 const statusVariants = {
@@ -18,15 +20,34 @@ const statusVariants = {
   Completed: 'success',
 } as const;
 
-export function ProjectCard({ project, onClick }: ProjectCardProps) {
+export function ProjectCard({ project, onClick, onDelete }: ProjectCardProps) {
   const completedMilestones = project.milestones.filter(m => m.completed).length;
   const totalMilestones = project.milestones.length;
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete();
+    }
+  };
+
   return (
-    <Card onClick={onClick} className="p-5 hover:border-indigo-500/30 transition-all">
+    <Card onClick={onClick} className="p-5 hover:border-indigo-500/30 transition-all group cursor-pointer">
       <div className="flex items-start justify-between mb-3">
         <h3 className="text-lg font-semibold text-slate-100">{project.name}</h3>
-        <Badge variant={statusVariants[project.status] as any}>{project.status}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant={statusVariants[project.status] as any}>{project.status}</Badge>
+          {onDelete && (
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={handleDelete}
+            >
+              <Trash2 className="w-4 h-4 text-red-400" />
+            </Button>
+          )}
+        </div>
       </div>
 
       <p className="text-sm text-slate-400 mb-4 line-clamp-2">{project.description}</p>

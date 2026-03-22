@@ -9,9 +9,9 @@ export function MissionStatement() {
         <div className="flex-1">
           <h2 className="text-xl font-semibold text-slate-100 mb-2">Mission Statement</h2>
           <p className="text-slate-400 leading-relaxed">
-            Build scalable income-generating systems through disciplined execution, 
-            ethical AI automation, and strategic trading — while honoring faith, family, 
-            and long-term sustainability over short-term gains.
+            Develop high-performance systems powered by AI and disciplined execution to generate 
+            sustainable income, continuous improvement, and long-term freedom — guided by integrity, 
+            faith, and long-term impact over short-term gains.
           </p>
         </div>
         
@@ -22,7 +22,7 @@ export function MissionStatement() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-200">Focus</p>
-              <p className="text-xs text-slate-500">High-ROI priorities</p>
+              <p className="text-xs text-slate-500">Prioritize high-impact systems</p>
             </div>
           </div>
           
@@ -32,7 +32,7 @@ export function MissionStatement() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-200">Integrity</p>
-              <p className="text-xs text-slate-500">Ethical boundaries</p>
+              <p className="text-xs text-slate-500">Ethical boundaries & faith</p>
             </div>
           </div>
           
@@ -42,7 +42,7 @@ export function MissionStatement() {
             </div>
             <div>
               <p className="text-sm font-medium text-slate-200">Execution</p>
-              <p className="text-xs text-slate-500">Disciplined action</p>
+              <p className="text-xs text-slate-500">Disciplined, consistent action</p>
             </div>
           </div>
         </div>

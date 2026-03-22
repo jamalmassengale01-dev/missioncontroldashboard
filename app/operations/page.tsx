@@ -17,53 +17,30 @@ import {
   Clock,
   RotateCcw,
   Trash2,
-  ChevronDown,
   ChevronUp,
   Terminal,
   Server,
   Plug,
   Shield,
   AlertTriangle,
-  Loader2
+  Loader2,
+  FileText,
+  Ban
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
+import { Modal } from '@/components/ui/Modal';
 
-// Status configuration
-const statusConfig: Record<WorkflowRunStatus, { color: string; icon: React.ReactNode; label: string }> = {
-  queued: { color: 'bg-slate-500', icon: <Clock className="w-3 h-3" />, label: 'Queued' },
-  assigned: { color: 'bg-blue-500', icon: <Activity className="w-3 h-3" />, label: 'Assigned' },
-  running: { color: 'bg-amber-500', icon: <Play className="w-3 h-3" />, label: 'Running' },
-  waiting: { color: 'bg-purple-500', icon: <Pause className="w-3 h-3" />, label: 'Waiting' },
-  completed: { color: 'bg-emerald-500', icon: <CheckCircle className="w-3 h-3" />, label: 'Completed' },
-  failed: { color: 'bg-red-500', icon: <XCircle className="w-3 h-3" />, label: 'Failed' },
-  blocked: { color: 'bg-rose-500', icon: <XCircle className="w-3 h-3" />, label: 'Blocked' },
-  canceled: { color: 'bg-slate-600', icon: <XCircle className="w-3 h-3" />, label: 'Canceled' },
+const statusConfig: Record<WorkflowRunStatus, { color: string; label: string }> = {
+  queued: { color: 'bg-slate-500', label: 'Queued' },
+  assigned: { color: 'bg-blue-500', label: 'Assigned' },
+  running: { color: 'bg-amber-500', label: 'Running' },
+  waiting: { color: 'bg-purple-500', label: 'Waiting' },
+  completed: { color: 'bg-emerald-500', label: 'Completed' },
+  failed: { color: 'bg-red-500', label: 'Failed' },
+  blocked: { color: 'bg-rose-500', label: 'Blocked' },
+  canceled: { color: 'bg-slate-600', label: 'Canceled' },
 };
-
-interface IntegrationStatus {
-  id: string;
-  name: string;
-  enabled: boolean;
-  configured: boolean;
-  health: {
-    status: 'healthy' | 'degraded' | 'unhealthy';
-    latency?: number;
-    lastError?: string;
-  } | null;
-}
-
-interface SystemHealth {
-  status: 'healthy' | 'degraded' | 'unhealthy';
-  timestamp: string;
-  summary: {
-    total: number;
-    healthy: number;
-    degraded: number;
-    unhealthy: number;
-    disabled: number;
-  };
-}
 
 export default function OperationsPage() {
   const [runs, setRuns] = useState<WorkflowRun[]>([]);
@@ -71,21 +48,15 @@ export default function OperationsPage() {
   const [filter, setFilter] = useState<WorkflowRunStatus | 'all'>('all');
   const [stats, setStats] = useState({ total: 0, active: 0, completed: 0, failed: 0 });
   const [isClient, setIsClient] = useState(false);
-  
-  // Integration status state
-  const [integrations, setIntegrations] = useState<IntegrationStatus[]>([]);
-  const [systemHealth, setSystemHealth] = useState<SystemHealth | null>(null);
-  const [integrationsLoading, setIntegrationsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'workflows' | 'integrations'>('workflows');
+  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
+  const [logsRun, setLogsRun] = useState<WorkflowRun | null>(null);
 
   useEffect(() => {
     setIsClient(true);
-    // Seed data on client side
     seedWorkflowData();
     loadRuns();
-    loadIntegrations();
 
-    // Subscribe to store updates
     const unsubscribe = workflowStore.onAll(() => {
       loadRuns();
     });
@@ -106,46 +77,7 @@ export default function OperationsPage() {
     });
   };
 
-  const loadIntegrations = async () => {
-    try {
-      setIntegrationsLoading(true);
-      const response = await fetch('/api/integrations');
-      if (response.ok) {
-        const data = await response.json();
-        setIntegrations(data.integrations);
-        setSystemHealth({
-          status: data.summary.unhealthy > 0 ? 'unhealthy' : data.summary.degraded > 0 ? 'degraded' : 'healthy',
-          timestamp: new Date().toISOString(),
-          summary: data.summary,
-        });
-      }
-    } catch (error) {
-      console.error('Failed to load integrations:', error);
-    } finally {
-      setIntegrationsLoading(false);
-    }
-  };
-
-  const toggleIntegration = async (integrationId: string, enabled: boolean) => {
-    try {
-      const response = await fetch('/api/integrations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ integrationId, enabled }),
-      });
-      
-      if (response.ok) {
-        // Refresh integrations list
-        await loadIntegrations();
-      }
-    } catch (error) {
-      console.error('Failed to toggle integration:', error);
-    }
-  };
-
-  const filteredRuns = filter === 'all' 
-    ? runs 
-    : runs.filter(r => r.status === filter);
+  const filteredRuns = filter === 'all' ? runs : runs.filter(r => r.status === filter);
 
   const handleCancel = (runId: string) => {
     workflowStore.cancelRun(runId);
@@ -166,6 +98,11 @@ export default function OperationsPage() {
     loadRuns();
   };
 
+  const handleViewLogs = (run: WorkflowRun) => {
+    setLogsRun(run);
+    setIsLogsModalOpen(true);
+  };
+
   const formatTime = (isoString: string) => {
     return new Date(isoString).toLocaleString();
   };
@@ -178,28 +115,6 @@ export default function OperationsPage() {
     if (duration < 60) return `${duration.toFixed(0)}s`;
     if (duration < 3600) return `${(duration / 60).toFixed(1)}m`;
     return `${(duration / 3600).toFixed(1)}h`;
-  };
-
-  const getIntegrationStatusIcon = (integration: IntegrationStatus) => {
-    if (!integration.configured) {
-      return <AlertTriangle className="w-5 h-5 text-amber-400" />;
-    }
-    if (!integration.enabled) {
-      return <Plug className="w-5 h-5 text-slate-500" />;
-    }
-    if (!integration.health) {
-      return <Shield className="w-5 h-5 text-slate-400" />;
-    }
-    switch (integration.health.status) {
-      case 'healthy':
-        return <CheckCircle className="w-5 h-5 text-emerald-400" />;
-      case 'degraded':
-        return <AlertTriangle className="w-5 h-5 text-amber-400" />;
-      case 'unhealthy':
-        return <XCircle className="w-5 h-5 text-red-400" />;
-      default:
-        return <Shield className="w-5 h-5 text-slate-400" />;
-    }
   };
 
   if (!isClient) {
@@ -282,12 +197,6 @@ export default function OperationsPage() {
                 <span className="flex items-center gap-2">
                   <Server className="w-4 h-4" />
                   Integrations
-                  {systemHealth && (
-                    <span className={`w-2 h-2 rounded-full ${
-                      systemHealth.status === 'healthy' ? 'bg-emerald-400' :
-                      systemHealth.status === 'degraded' ? 'bg-amber-400' : 'bg-red-400'
-                    }`} />
-                  )}
                 </span>
               </button>
             </div>
@@ -393,8 +302,9 @@ export default function OperationsPage() {
                                       variant="ghost" 
                                       size="sm"
                                       onClick={(e) => { e.stopPropagation(); handleCancel(run.id); }}
+                                      title="Cancel workflow"
                                     >
-                                      <XCircle className="w-4 h-4 text-slate-400" />
+                                      <Ban className="w-4 h-4 text-slate-400" />
                                     </Button>
                                   )}
                                   {(run.status === 'failed' || run.status === 'blocked') && (
@@ -402,6 +312,7 @@ export default function OperationsPage() {
                                       variant="ghost" 
                                       size="sm"
                                       onClick={(e) => { e.stopPropagation(); handleRetry(run.id); }}
+                                      title="Retry workflow"
                                     >
                                       <RotateCcw className="w-4 h-4 text-amber-400" />
                                     </Button>
@@ -409,7 +320,16 @@ export default function OperationsPage() {
                                   <Button 
                                     variant="ghost" 
                                     size="sm"
+                                    onClick={(e) => { e.stopPropagation(); handleViewLogs(run); }}
+                                    title="View logs"
+                                  >
+                                    <FileText className="w-4 h-4 text-indigo-400" />
+                                  </Button>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm"
                                     onClick={(e) => { e.stopPropagation(); handleDelete(run.id); }}
+                                    title="Delete run"
                                   >
                                     <Trash2 className="w-4 h-4 text-red-400" />
                                   </Button>
@@ -443,7 +363,6 @@ export default function OperationsPage() {
                     </div>
                     
                     <div className="p-4 space-y-4">
-                      {/* Run Info */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
                           <p className="text-slate-500">Run ID</p>
@@ -468,15 +387,6 @@ export default function OperationsPage() {
                         </div>
                       </div>
 
-                      {/* Input */}
-                      <div>
-                        <p className="text-slate-500 text-sm mb-2">Input</p>
-                        <pre className="bg-slate-950 p-3 rounded-lg text-xs text-slate-300 overflow-x-auto">
-                          {JSON.stringify(selectedRun.input, null, 2)}
-                        </pre>
-                      </div>
-
-                      {/* Output */}
                       {selectedRun.output && (
                         <div>
                           <p className="text-slate-500 text-sm mb-2">Output</p>
@@ -489,7 +399,6 @@ export default function OperationsPage() {
                         </div>
                       )}
 
-                      {/* Error */}
                       {selectedRun.error && (
                         <div>
                           <p className="text-slate-500 text-sm mb-2">Error</p>
@@ -499,11 +408,16 @@ export default function OperationsPage() {
                         </div>
                       )}
 
-                      {/* Logs */}
                       <div>
-                        <p className="text-slate-500 text-sm mb-2">Logs ({selectedRun.logs.length})</p>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-slate-500 text-sm">Logs ({selectedRun.logs.length})</p>
+                          <Button variant="ghost" size="sm" onClick={() => handleViewLogs(selectedRun)}>
+                            <FileText className="w-4 h-4 mr-2" />
+                            View Full Logs
+                          </Button>
+                        </div>
                         <div className="bg-slate-950 rounded-lg overflow-hidden max-h-64 overflow-y-auto">
-                          {selectedRun.logs.map((log) => (
+                          {selectedRun.logs.slice(0, 10).map((log) => (
                             <div 
                               key={log.id} 
                               className={`px-3 py-2 text-xs font-mono border-b border-slate-900 last:border-0 ${
@@ -526,6 +440,11 @@ export default function OperationsPage() {
                               <span className="ml-2">{log.message}</span>
                             </div>
                           ))}
+                          {selectedRun.logs.length > 10 && (
+                            <div className="px-3 py-2 text-xs text-slate-500 text-center">
+                              ... {selectedRun.logs.length - 10} more logs
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -536,125 +455,63 @@ export default function OperationsPage() {
 
             {/* Integrations Tab */}
             {activeTab === 'integrations' && (
-              <div className="space-y-6">
-                {/* System Health Summary */}
-                {systemHealth && (
-                  <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                          systemHealth.status === 'healthy' ? 'bg-emerald-500/20' :
-                          systemHealth.status === 'degraded' ? 'bg-amber-500/20' : 'bg-red-500/20'
-                        }`}>
-                          <Server className={`w-5 h-5 ${
-                            systemHealth.status === 'healthy' ? 'text-emerald-400' :
-                            systemHealth.status === 'degraded' ? 'text-amber-400' : 'text-red-400'
-                          }`} />
-                        </div>
-                        <div>
-                          <h2 className="text-lg font-semibold text-slate-100">System Health</h2>
-                          <p className="text-slate-500 text-sm">
-                            {systemHealth.summary.healthy} healthy, {systemHealth.summary.degraded} degraded, {systemHealth.summary.unhealthy} unhealthy, {systemHealth.summary.disabled} disabled
-                          </p>
-                        </div>
-                      </div>
-                      <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        systemHealth.status === 'healthy' ? 'bg-emerald-500/20 text-emerald-400' :
-                        systemHealth.status === 'degraded' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'
-                      }`}>
-                        {systemHealth.status.toUpperCase()}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Integrations List */}
-                <div className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
-                  <div className="p-4 border-b border-slate-800 flex items-center gap-2">
-                    <Plug className="w-5 h-5 text-indigo-400" />
-                    <h2 className="text-lg font-semibold text-slate-100">Integrations</h2>
-                    {integrationsLoading && <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />}
-                  </div>
-
-                  <div className="divide-y divide-slate-800">
-                    {integrations.map((integration) => (
-                      <div key={integration.id} className="p-4 flex items-center justify-between hover:bg-slate-800/30">
-                        <div className="flex items-center gap-4">
-                          {getIntegrationStatusIcon(integration)}
-                          <div>
-                            <h3 className="text-sm font-medium text-slate-200">{integration.name}</h3>
-                            <div className="flex items-center gap-2 mt-1">
-                              {!integration.configured ? (
-                                <span className="text-xs text-amber-400">Not configured</span>
-                              ) : integration.enabled ? (
-                                <span className="text-xs text-emerald-400">Enabled</span>
-                              ) : (
-                                <span className="text-xs text-slate-500">Disabled</span>
-                              )}
-                              {integration.health && (
-                                <span className={`text-xs ${
-                                  integration.health.status === 'healthy' ? 'text-emerald-400' :
-                                  integration.health.status === 'degraded' ? 'text-amber-400' : 'text-red-400'
-                                }`}>
-                                  {integration.health.status}
-                                  {integration.health.latency && ` (${integration.health.latency}ms)`}
-                                </span>
-                              )}
-                            </div>
-                            {integration.health?.lastError && (
-                              <p className="text-xs text-red-400 mt-1">{integration.health.lastError}</p>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {integration.configured && (
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              type="checkbox"
-                              checked={integration.enabled}
-                              onChange={(e) => toggleIntegration(integration.id, e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-emerald-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                          </label>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {integrations.length === 0 && !integrationsLoading && (
-                    <div className="p-8 text-center">
-                      <p className="text-slate-500">No integrations configured</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Environment Status */}
-                <div className="bg-slate-900/50 border border-slate-800 rounded-xl overflow-hidden">
-                  <div className="p-4 border-b border-slate-800 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-slate-400" />
-                    <h2 className="text-lg font-semibold text-slate-100">Environment</h2>
-                  </div>
-                  <div className="p-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-500">Node Environment</span>
-                      <span className="text-slate-300 font-mono">{process.env.NODE_ENV || 'development'}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-500">App Name</span>
-                      <span className="text-slate-300 font-mono">Mission Control</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-slate-500">Version</span>
-                      <span className="text-slate-300 font-mono">0.1.0</span>
-                    </div>
-                  </div>
-                </div>
+              <div className="p-8 text-center">
+                <p className="text-slate-500">Integrations panel coming soon</p>
               </div>
             )}
           </div>
         </main>
       </div>
+
+      {/* View Logs Modal */}
+      {logsRun && (
+        <Modal
+          isOpen={isLogsModalOpen}
+          onClose={() => setIsLogsModalOpen(false)}
+          title={`Logs: ${logsRun.workflowName}`}
+          size="lg"
+          footer={
+            <Button variant="secondary" onClick={() => setIsLogsModalOpen(false)}>Close</Button>
+          }
+        >
+          <div className="space-y-4">
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-slate-400">Run ID: <span className="text-slate-200 font-mono">{logsRun.id}</span></span>
+              <span className="text-slate-400">Status: 
+                <span className={`ml-1 ${statusConfig[logsRun.status].color.replace('bg-', 'text-')}`}>
+                  {statusConfig[logsRun.status].label}
+                </span>
+              </span>
+            </div>
+            
+            <div className="bg-slate-950 rounded-lg overflow-hidden max-h-96 overflow-y-auto border border-slate-800">
+              {logsRun.logs.map((log) => (
+                <div 
+                  key={log.id} 
+                  className={`px-3 py-2 text-xs font-mono border-b border-slate-900 last:border-0 ${
+                    log.level === 'error' ? 'text-red-400 bg-red-950/10' :
+                    log.level === 'warn' ? 'text-amber-400 bg-amber-950/10' :
+                    log.level === 'debug' ? 'text-slate-500' :
+                    'text-slate-300'
+                  }`}
+                >
+                  <span className="text-slate-600">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                  <span className={`ml-2 uppercase text-[10px] px-1 rounded ${
+                    log.level === 'error' ? 'bg-red-900/50 text-red-300' :
+                    log.level === 'warn' ? 'bg-amber-900/50 text-amber-300' :
+                    log.level === 'debug' ? 'bg-slate-800 text-slate-400' :
+                    'bg-emerald-900/50 text-emerald-300'
+                  }`}>
+                    {log.level}
+                  </span>
+                  {log.agent && <span className="ml-2 text-indigo-400">[{log.agent}]</span>}
+                  <span className="ml-2">{log.message}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

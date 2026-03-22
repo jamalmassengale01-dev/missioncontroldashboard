@@ -6,6 +6,7 @@ import { TopBar } from '@/components/layout/TopBar';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectModal } from '@/components/projects/ProjectModal';
 import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 import { projectsData } from '@/lib/data';
 import { Project, ProjectStatus } from '@/lib/types';
 import { Plus, Filter, ArrowUpDown } from 'lucide-react';
@@ -19,6 +20,15 @@ export default function ProjectsPage() {
   const [sortBy, setSortBy] = useState<SortOption>('updated');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  
+  // Create project form state
+  const [newProject, setNewProject] = useState<Partial<Project>>({
+    name: '',
+    description: '',
+    status: 'Planning',
+    category: '',
+  });
 
   const filteredProjects = useMemo(() => {
     let filtered = projects;
@@ -40,8 +50,42 @@ export default function ProjectsPage() {
   };
 
   const handleCreateProject = () => {
-    setSelectedProject(null);
-    setIsModalOpen(true);
+    setNewProject({
+      name: '',
+      description: '',
+      status: 'Planning',
+      category: '',
+    });
+    setIsCreateModalOpen(true);
+  };
+
+  const handleSaveNewProject = () => {
+    if (!newProject.name) return;
+    
+    const project: Project = {
+      id: `proj-${Date.now()}`,
+      name: newProject.name || '',
+      description: newProject.description || '',
+      status: newProject.status || 'Planning',
+      category: newProject.category || 'General',
+      progress: 0,
+      linkedTaskCount: 0,
+      linkedDocumentCount: 0,
+      milestones: [],
+      lastUpdated: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    
+    setProjects(prev => [project, ...prev]);
+    setIsCreateModalOpen(false);
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    setProjects(prev => prev.filter(p => p.id !== projectId));
+    if (selectedProject?.id === projectId) {
+      setIsModalOpen(false);
+      setSelectedProject(null);
+    }
   };
 
   return (
@@ -120,6 +164,7 @@ export default function ProjectsPage() {
                   key={project.id}
                   project={project}
                   onClick={() => handleProjectClick(project)}
+                  onDelete={() => handleDeleteProject(project.id)}
                 />
               ))}
             </div>
@@ -137,7 +182,75 @@ export default function ProjectsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         project={selectedProject}
+        onSave={(updatedProject) => {
+          setProjects(prev => prev.map(p => p.id === updatedProject.id ? updatedProject : p));
+          setSelectedProject(updatedProject);
+        }}
+        onDelete={handleDeleteProject}
       />
+
+      {/* Create Project Modal */}
+      <Modal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        title="Create New Project"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsCreateModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveNewProject}>Create Project</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Project Name</label>
+            <input
+              type="text"
+              value={newProject.name || ''}
+              onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+              placeholder="Enter project name..."
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Description</label>
+            <textarea
+              value={newProject.description || ''}
+              onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              rows={3}
+              placeholder="Enter project description..."
+            />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Status</label>
+              <select
+                value={newProject.status}
+                onChange={(e) => setNewProject({ ...newProject, status: e.target.value as ProjectStatus })}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+              >
+                {statusOptions.map((status) => (
+                  <option key={status} value={status}>{status}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Category</label>
+              <input
+                type="text"
+                value={newProject.category || ''}
+                onChange={(e) => setNewProject({ ...newProject, category: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+                placeholder="e.g., Trading, Content"
+              />
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

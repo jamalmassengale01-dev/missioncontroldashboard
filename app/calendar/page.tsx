@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { CalendarView } from '@/components/calendar/CalendarView';
@@ -22,10 +22,10 @@ export default function CalendarPage() {
       <Sidebar />
       <div className="flex-1 flex flex-col lg:ml-64">
         <TopBar title="Calendar" />
-        <main className="flex-1 overflow-hidden p-4 lg:p-8">
+        <main className="flex-1 overflow-hidden p-4 lg:p-6">
           <div className="h-full max-w-7xl mx-auto flex flex-col">
             {/* Header */}
-            <div className="mb-4">
+            <div className="mb-4 flex-shrink-0">
               <h1 className="text-2xl font-semibold text-slate-100">Calendar</h1>
               <p className="text-slate-500 text-sm mt-1">
                 Schedule and track all activities
@@ -33,7 +33,7 @@ export default function CalendarPage() {
             </div>
 
             {/* Calendar */}
-            <div className="flex-1 min-h-0">
+            <div className="flex-1 min-h-0 overflow-hidden">
               <CalendarView
                 events={calendarEvents}
                 onEventClick={handleEventClick}

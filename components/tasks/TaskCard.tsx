@@ -6,7 +6,7 @@ import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Avatar } from '../ui/Avatar';
 import { Draggable } from '@hello-pangea/dnd';
-import { Calendar, MessageSquare, Play, Loader2, CheckCircle } from 'lucide-react';
+import { Calendar, MessageSquare, Play, Loader2, CheckCircle, Trash2 } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { workflowStore } from '@/lib/store/workflowStore';
 import { getAllWorkflowDefinitions } from '@/lib/workflows/definitions';
@@ -16,6 +16,7 @@ interface TaskCardProps {
   task: Task;
   index: number;
   onClick: () => void;
+  onDelete?: () => void;
 }
 
 const priorityVariants: Record<Task['priority'], 'default' | 'primary' | 'warning' | 'danger'> = {
@@ -52,7 +53,7 @@ function getAgentIdForTask(task: Task): string {
   return agentMap[task.assignedAgent] || 'edgepilot';
 }
 
-export function TaskCard({ task, index, onClick }: TaskCardProps) {
+export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
   const [isExecuting, setIsExecuting] = useState(false);
   const [lastRunId, setLastRunId] = useState<string | null>(null);
   const [runStatus, setRunStatus] = useState<string | null>(null);
@@ -143,6 +144,13 @@ export function TaskCard({ task, index, onClick }: TaskCardProps) {
 
   const canExecute = ['DeepForge', 'ScriptForge', 'GrowthForge', 'BuildForge', 'SignalForge', 'EdgePilot'].includes(task.assignedAgent);
 
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete();
+    }
+  };
+
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -158,9 +166,21 @@ export function TaskCard({ task, index, onClick }: TaskCardProps) {
               <h3 className="text-sm font-medium text-slate-200 line-clamp-2 group-hover:text-indigo-300 transition-colors">
                 {task.title}
               </h3>
-              <Badge variant={priorityVariants[task.priority]} size="sm">
-                {task.priority}
-              </Badge>
+              <div className="flex items-center gap-1">
+                <Badge variant={priorityVariants[task.priority]} size="sm">
+                  {task.priority}
+                </Badge>
+                {onDelete && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={handleDelete}
+                  >
+                    <Trash2 className="w-3 h-3 text-red-400" />
+                  </Button>
+                )}
+              </div>
             </div>
             
             <p className="text-xs text-slate-500 line-clamp-2 mb-3">

@@ -6,16 +6,35 @@ import { TopBar } from '@/components/layout/TopBar';
 import { MemoryEntry } from '@/components/memory/MemoryEntry';
 import { MemoryFilters } from '@/components/memory/MemoryFilters';
 import { Button } from '@/components/ui/Button';
-import { memoryEntries } from '@/lib/data';
-import { MemoryTag } from '@/lib/types';
-import { Plus, Brain } from 'lucide-react';
+import { Modal } from '@/components/ui/Modal';
+import { Badge } from '@/components/ui/Badge';
+import { memoryEntries as initialEntries } from '@/lib/data';
+import { MemoryEntry as MemoryEntryType, MemoryTag } from '@/lib/types';
+import { Plus, Brain, X, Trash2, Edit3 } from 'lucide-react';
+
+const allTags: MemoryTag[] = ['Research', 'Content', 'Strategy', 'Technical', 'Decisions'];
 
 export default function MemoryPage() {
+  const [entries, setEntries] = useState<MemoryEntryType[]>(initialEntries);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTag, setSelectedTag] = useState<MemoryTag | null>(null);
+  
+  // Modal states
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEntry, setSelectedEntry] = useState<MemoryEntryType | null>(null);
+  
+  // Form state
+  const [newEntry, setNewEntry] = useState<Partial<MemoryEntryType>>({
+    title: '',
+    summary: '',
+    content: '',
+    tags: [],
+  });
 
   const filteredEntries = useMemo(() => {
-    return memoryEntries.filter((entry) => {
+    return entries.filter((entry) => {
       const matchesSearch = !searchQuery ||
         entry.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         entry.summary.toLowerCase().includes(searchQuery.toLowerCase());
@@ -24,7 +43,77 @@ export default function MemoryPage() {
       
       return matchesSearch && matchesTag;
     });
-  }, [searchQuery, selectedTag]);
+  }, [entries, searchQuery, selectedTag]);
+
+  const handleAddMemory = () => {
+    setNewEntry({
+      title: '',
+      summary: '',
+      content: '',
+      tags: [],
+    });
+    setIsAddModalOpen(true);
+  };
+
+  const handleSaveNewEntry = () => {
+    if (!newEntry.title) return;
+    
+    const entry: MemoryEntryType = {
+      id: `mem-${Date.now()}`,
+      title: newEntry.title || '',
+      summary: newEntry.summary || '',
+      content: newEntry.content || '',
+      tags: newEntry.tags || [],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    
+    setEntries(prev => [entry, ...prev]);
+    setIsAddModalOpen(false);
+  };
+
+  const handleEntryClick = (entry: MemoryEntryType) => {
+    setSelectedEntry(entry);
+    setIsViewModalOpen(true);
+  };
+
+  const handleEditEntry = () => {
+    if (selectedEntry) {
+      setNewEntry(selectedEntry);
+      setIsViewModalOpen(false);
+      setIsEditModalOpen(true);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!selectedEntry || !newEntry.title) return;
+    
+    setEntries(prev => prev.map(e => 
+      e.id === selectedEntry.id 
+        ? { ...e, ...newEntry, updatedAt: new Date().toISOString() } as MemoryEntryType
+        : e
+    ));
+    setIsEditModalOpen(false);
+    setSelectedEntry(null);
+  };
+
+  const handleDeleteEntry = (entryId: string) => {
+    setEntries(prev => prev.filter(e => e.id !== entryId));
+    if (selectedEntry?.id === entryId) {
+      setIsViewModalOpen(false);
+      setIsEditModalOpen(false);
+      setSelectedEntry(null);
+    }
+  };
+
+  const toggleTag = (tag: MemoryTag) => {
+    const currentTags = newEntry.tags || [];
+    if (currentTags.includes(tag)) {
+      setNewEntry({ ...newEntry, tags: currentTags.filter(t => t !== tag) });
+    } else {
+      setNewEntry({ ...newEntry, tags: [...currentTags, tag] });
+    }
+  };
 
   return (
     <div className="flex h-screen bg-slate-950">
@@ -44,7 +133,7 @@ export default function MemoryPage() {
                   <p className="text-slate-500 text-sm">Search and browse knowledge base</p>
                 </div>
               </div>
-              <Button>
+              <Button onClick={handleAddMemory}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Memory
               </Button>
@@ -63,7 +152,12 @@ export default function MemoryPage() {
             {/* Memory Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEntries.map((entry) => (
-                <MemoryEntry key={entry.id} entry={entry} />
+                <MemoryEntry 
+                  key={entry.id} 
+                  entry={entry} 
+                  onClick={() => handleEntryClick(entry)}
+                  onDelete={() => handleDeleteEntry(entry.id)}
+                />
               ))}
             </div>
 
@@ -76,6 +170,184 @@ export default function MemoryPage() {
           </div>
         </main>
       </div>
+
+      {/* Add Memory Modal */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Add New Memory"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveNewEntry}>Save Memory</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Title</label>
+            <input
+              type="text"
+              value={newEntry.title || ''}
+              onChange={(e) => setNewEntry({ ...newEntry, title: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+              placeholder="Enter memory title..."
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Summary</label>
+            <textarea
+              value={newEntry.summary || ''}
+              onChange={(e) => setNewEntry({ ...newEntry, summary: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              rows={2}
+              placeholder="Brief summary..."
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Content</label>
+            <textarea
+              value={newEntry.content || ''}
+              onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              rows={4}
+              placeholder="Full content..."
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Tags</label>
+            <div className="flex flex-wrap gap-2">
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                    (newEntry.tags || []).includes(tag)
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* View Memory Modal */}
+      {selectedEntry && (
+        <Modal
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+          title={selectedEntry.title}
+          footer={
+            <>
+              <Button variant="ghost" onClick={() => setIsViewModalOpen(false)}>Close</Button>
+              <Button variant="secondary" onClick={handleEditEntry}>
+                <Edit3 className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              <Button variant="danger" onClick={() => handleDeleteEntry(selectedEntry.id)}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </>
+          }
+        >
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              {selectedEntry.tags.map((tag) => (
+                <Badge key={tag} variant="secondary" size="sm">{tag}</Badge>
+              ))}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Summary</label>
+              <p className="text-slate-300">{selectedEntry.summary}</p>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Content</label>
+              <div className="bg-slate-950 border border-slate-800 rounded-lg p-4">
+                <p className="text-slate-300 whitespace-pre-wrap">{selectedEntry.content || 'No content available.'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 text-xs text-slate-500">
+              <span>Created: {new Date(selectedEntry.createdAt).toLocaleDateString()}</span>
+              <span>Updated: {new Date(selectedEntry.updatedAt).toLocaleDateString()}</span>
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Edit Memory Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Memory"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsEditModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveEdit}>Save Changes</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Title</label>
+            <input
+              type="text"
+              value={newEntry.title || ''}
+              onChange={(e) => setNewEntry({ ...newEntry, title: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Summary</label>
+            <textarea
+              value={newEntry.summary || ''}
+              onChange={(e) => setNewEntry({ ...newEntry, summary: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              rows={2}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Content</label>
+            <textarea
+              value={newEntry.content || ''}
+              onChange={(e) => setNewEntry({ ...newEntry, content: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              rows={4}
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Tags</label>
+            <div className="flex flex-wrap gap-2">
+              {allTags.map((tag) => (
+                <button
+                  key={tag}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                    (newEntry.tags || []).includes(tag)
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-slate-800 text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

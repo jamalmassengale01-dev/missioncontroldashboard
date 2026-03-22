@@ -8,12 +8,13 @@ import { PriorityQueue } from '@/components/architect/PriorityQueue';
 import { DecisionQueue } from '@/components/architect/DecisionQueue';
 import { SystemStats } from '@/components/architect/SystemStats';
 import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 import { Badge } from '@/components/ui/Badge';
-import { focusAreas, priorityQueue, decisionQueue, tasks } from '@/lib/data';
+import { focusAreas, priorityQueue, decisionQueue, tasks, agents } from '@/lib/data';
 import { getAllWorkflowDefinitions, WorkflowDefinition } from '@/lib/workflows/definitions';
 import { workflowStore } from '@/lib/store/workflowStore';
 import { executeWorkflow } from '@/lib/agents/executor';
-import { WorkflowRun } from '@/lib/types';
+import { WorkflowRun, Task, Agent } from '@/lib/types';
 import { Crown, Plus, UserPlus, Play, ScrollText, Rocket, Loader2, CheckCircle, XCircle, Activity } from 'lucide-react';
 
 export default function ArchitectPage() {
@@ -24,6 +25,24 @@ export default function ArchitectPage() {
   const [recentRuns, setRecentRuns] = useState<WorkflowRun[]>([]);
   const [isLaunching, setIsLaunching] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  
+  // Modal states
+  const [isCreateTaskModalOpen, setIsCreateTaskModalOpen] = useState(false);
+  const [isAssignAgentModalOpen, setIsAssignAgentModalOpen] = useState(false);
+  const [isReviewPrioritiesModalOpen, setIsReviewPrioritiesModalOpen] = useState(false);
+  
+  // Task form state
+  const [newTask, setNewTask] = useState<Partial<Task>>({
+    title: '',
+    description: '',
+    assignedAgent: 'BuildForge',
+    priority: 'Medium',
+    status: 'Backlog',
+  });
+  
+  // Assign agent form state
+  const [selectedAgent, setSelectedAgent] = useState<string>('');
+  const [assignmentTask, setAssignmentTask] = useState<string>('');
 
   const activeProjects = 5;
   const tasksInProgress = tasks.filter(t => t.status === 'In Progress').length;
@@ -86,6 +105,38 @@ export default function ArchitectPage() {
       });
     }
     setWorkflowInput(defaultInput);
+  };
+
+  const handleCreateTask = () => {
+    setNewTask({
+      title: '',
+      description: '',
+      assignedAgent: 'BuildForge',
+      priority: 'Medium',
+      status: 'Backlog',
+    });
+    setIsCreateTaskModalOpen(true);
+  };
+
+  const handleSaveTask = () => {
+    // In a real app, this would save to a backend
+    console.log('Creating task:', newTask);
+    setIsCreateTaskModalOpen(false);
+  };
+
+  const handleAssignAgent = () => {
+    setSelectedAgent(agents[0]?.id || '');
+    setAssignmentTask('');
+    setIsAssignAgentModalOpen(true);
+  };
+
+  const handleSaveAssignment = () => {
+    console.log('Assigning agent:', selectedAgent, 'to task:', assignmentTask);
+    setIsAssignAgentModalOpen(false);
+  };
+
+  const handleReviewPriorities = () => {
+    setIsReviewPrioritiesModalOpen(true);
   };
 
   const renderInputField = (key: string, schema: any) => {
@@ -175,15 +226,15 @@ export default function ArchitectPage() {
 
             {/* Quick Actions */}
             <div className="flex flex-wrap gap-3">
-              <Button>
+              <Button onClick={handleCreateTask}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Task
               </Button>
-              <Button variant="secondary">
+              <Button variant="secondary" onClick={handleAssignAgent}>
                 <UserPlus className="w-4 h-4 mr-2" />
                 Assign Agent
               </Button>
-              <Button variant="secondary" onClick={scrollToPriorities}>
+              <Button variant="secondary" onClick={handleReviewPriorities}>
                 <ScrollText className="w-4 h-4 mr-2" />
                 Review Priorities
               </Button>
@@ -335,6 +386,137 @@ export default function ArchitectPage() {
           </div>
         </main>
       </div>
+
+      {/* Create Task Modal */}
+      <Modal
+        isOpen={isCreateTaskModalOpen}
+        onClose={() => setIsCreateTaskModalOpen(false)}
+        title="Create New Task"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsCreateTaskModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveTask}>Create Task</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Title</label>
+            <input
+              type="text"
+              value={newTask.title || ''}
+              onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+              placeholder="Enter task title..."
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Description</label>
+            <textarea
+              value={newTask.description || ''}
+              onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              rows={3}
+              placeholder="Enter task description..."
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Assigned Agent</label>
+              <select
+                value={newTask.assignedAgent}
+                onChange={(e) => setNewTask({ ...newTask, assignedAgent: e.target.value })}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+              >
+                {agents.map((agent) => (
+                  <option key={agent.id} value={agent.name}>{agent.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-400 mb-1.5">Priority</label>
+              <select
+                value={newTask.priority}
+                onChange={(e) => setNewTask({ ...newTask, priority: e.target.value as Task['priority'] })}
+                className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+              >
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+                <option value="Critical">Critical</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Assign Agent Modal */}
+      <Modal
+        isOpen={isAssignAgentModalOpen}
+        onClose={() => setIsAssignAgentModalOpen(false)}
+        title="Assign Agent to Task"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => setIsAssignAgentModalOpen(false)}>Cancel</Button>
+            <Button onClick={handleSaveAssignment}>Assign</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Select Agent</label>
+            <select
+              value={selectedAgent}
+              onChange={(e) => setSelectedAgent(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50"
+            >
+              {agents.filter(a => a.id !== 'chief-architect').map((agent) => (
+                <option key={agent.id} value={agent.id}>{agent.name} - {agent.role}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Task Description</label>
+            <textarea
+              value={assignmentTask}
+              onChange={(e) => setAssignmentTask(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 resize-none"
+              rows={3}
+              placeholder="Describe the task to assign..."
+            />
+          </div>
+        </div>
+      </Modal>
+
+      {/* Review Priorities Modal */}
+      <Modal
+        isOpen={isReviewPrioritiesModalOpen}
+        onClose={() => setIsReviewPrioritiesModalOpen(false)}
+        title="Review Priority Queue"
+        footer={
+          <Button variant="secondary" onClick={() => setIsReviewPrioritiesModalOpen(false)}>Close</Button>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-400">Current priority rankings and their impact assessment:</p>
+          <div className="space-y-3">
+            {priorityQueue.map((item, index) => (
+              <div key={item.id} className="p-3 bg-slate-950 border border-slate-800 rounded-lg">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-medium text-slate-200">#{index + 1} {item.title}</span>
+                  <Badge variant={item.impact === 'High' ? 'danger' : item.impact === 'Medium' ? 'warning' : 'default'} size="sm">
+                    {item.impact} Impact
+                  </Badge>
+                </div>
+                <p className="text-xs text-slate-500 mb-2">{item.description}</p>
+                <div className="flex items-center gap-4 text-xs text-slate-400">
+                  <span>Effort: {item.estimatedEffort}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

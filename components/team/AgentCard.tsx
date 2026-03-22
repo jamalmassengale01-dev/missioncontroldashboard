@@ -10,6 +10,7 @@ import { Circle, Clock, AlertCircle, Power, MessageSquare, Activity, Plus } from
 
 interface AgentCardProps {
   agent: Agent;
+  onAssignTask?: () => void;
 }
 
 const statusConfig: Record<Agent['status'], { color: string; icon: React.ReactNode; label: string }> = {
@@ -19,7 +20,7 @@ const statusConfig: Record<Agent['status'], { color: string; icon: React.ReactNo
   offline: { color: 'bg-slate-700', icon: <Power className="w-3 h-3" />, label: 'Offline' },
 };
 
-export function AgentCard({ agent }: AgentCardProps) {
+export function AgentCard({ agent, onAssignTask }: AgentCardProps) {
   const status = statusConfig[agent.status];
 
   return (
@@ -54,18 +55,21 @@ export function AgentCard({ agent }: AgentCardProps) {
         <div>
           <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Capabilities</p>
           <ul className="space-y-1">
-            {agent.capabilities.map((capability, index) => (
+            {agent.capabilities.slice(0, 4).map((capability, index) => (
               <li key={index} className="text-sm text-slate-400 flex items-start gap-2">
                 <span className="text-indigo-500 mt-1">•</span>
                 <span>{capability}</span>
               </li>
             ))}
+            {agent.capabilities.length > 4 && (
+              <li className="text-xs text-slate-500">+{agent.capabilities.length - 4} more</li>
+            )}
           </ul>
         </div>
       </div>
 
       <div className="flex gap-2 pt-4 border-t border-slate-800">
-        <Button variant="secondary" size="sm" className="flex-1">
+        <Button variant="secondary" size="sm" className="flex-1" onClick={onAssignTask}>
           <Plus className="w-3 h-3 mr-1" />
           Assign Task
         </Button>

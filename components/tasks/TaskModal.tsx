@@ -6,20 +6,22 @@ import { Modal } from '../ui/Modal';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
 import { agents, projects } from '@/lib/data';
-import { Calendar, Clock, User, Tag, AlertCircle, MessageSquare } from 'lucide-react';
+import { Calendar, Clock, User, Tag, AlertCircle, MessageSquare, Trash2 } from 'lucide-react';
 
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
   task?: Task;
   defaultColumn?: ColumnType;
+  defaultAgent?: string;
   onSave: (task: Task) => void;
+  onDelete?: (taskId: string) => void;
 }
 
 const priorities: Task['priority'][] = ['Low', 'Medium', 'High', 'Critical'];
 const agentNames = agents.map((a) => a.name);
 
-export function TaskModal({ isOpen, onClose, task, defaultColumn, onSave }: TaskModalProps) {
+export function TaskModal({ isOpen, onClose, task, defaultColumn, defaultAgent, onSave, onDelete }: TaskModalProps) {
   const isEditing = !!task;
   const [formData, setFormData] = useState<Partial<Task>>({
     title: '',
@@ -39,7 +41,7 @@ export function TaskModal({ isOpen, onClose, task, defaultColumn, onSave }: Task
       setFormData({
         title: '',
         description: '',
-        assignedAgent: agentNames[0],
+        assignedAgent: defaultAgent ? agents.find(a => a.id === defaultAgent)?.name || agentNames[0] : agentNames[0],
         priority: 'Medium',
         dueDate: new Date().toISOString().split('T')[0],
         project: projects[0],
@@ -47,7 +49,7 @@ export function TaskModal({ isOpen, onClose, task, defaultColumn, onSave }: Task
         activityLog: [],
       });
     }
-  }, [task, defaultColumn, isOpen]);
+  }, [task, defaultColumn, defaultAgent, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,6 +78,13 @@ export function TaskModal({ isOpen, onClose, task, defaultColumn, onSave }: Task
     onClose();
   };
 
+  const handleDelete = () => {
+    if (task && onDelete) {
+      onDelete(task.id);
+      onClose();
+    }
+  };
+
   const priorityVariants: Record<Task['priority'], 'default' | 'primary' | 'warning' | 'danger'> = {
     Low: 'default',
     Medium: 'primary',
@@ -91,6 +100,12 @@ export function TaskModal({ isOpen, onClose, task, defaultColumn, onSave }: Task
       size="md"
       footer={
         <>
+          {isEditing && onDelete && (
+            <Button variant="danger" onClick={handleDelete} className="mr-auto">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          )}
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
