@@ -162,7 +162,7 @@ export const tasks: Task[] = [
     id: 'task-rs-3',
     title: 'Build Pine Script indicator for trading discipline',
     description: 'Create simple Pine Script tool: session high/low marker, risk calculator overlay, or daily max loss visual line. Keep it simple and stable.',
-    assignedAgent: 'BuildForge',
+    assignedAgent: 'buildforge',
     priority: 'High',
     dueDate: '2026-03-28',
     project: '$100 Revenue Sprint - Trading Products',
@@ -270,14 +270,14 @@ export const tasks: Task[] = [
     id: 'task-4',
     title: 'Build Mission Control Dashboard',
     description: 'Create the central command center for managing agents, tasks, and priorities.',
-    assignedAgent: 'BuildForge',
+    assignedAgent: 'buildforge',
     priority: 'Critical',
     dueDate: '2026-03-21',
     project: 'Automation Systems',
     status: 'In Progress',
     activityLog: [
       { id: 'a7', timestamp: '2026-03-21T04:00:00Z', action: 'Phase 1 started', agent: 'EdgePilot' },
-      { id: 'a8', timestamp: '2026-03-21T12:00:00Z', action: 'Kanban board implemented', agent: 'BuildForge' },
+      { id: 'a8', timestamp: '2026-03-21T12:00:00Z', action: 'Kanban board implemented', agent: 'buildforge' },
     ],
   },
   {
@@ -310,7 +310,7 @@ export const tasks: Task[] = [
     id: 'task-7',
     title: 'Implement Pine Script strategy backtester',
     description: 'Build tool to backtest TradingView strategies with historical data.',
-    assignedAgent: 'BuildForge',
+    assignedAgent: 'buildforge',
     priority: 'High',
     dueDate: '2026-03-30',
     project: 'Trading Systems',
@@ -350,14 +350,14 @@ export const tasks: Task[] = [
     id: 'task-10',
     title: 'Document API integration patterns',
     description: 'Create documentation for standard API integration approaches used across projects.',
-    assignedAgent: 'BuildForge',
+    assignedAgent: 'buildforge',
     priority: 'Low',
     dueDate: '2026-03-29',
     project: 'AI Tools',
     status: 'Done',
     activityLog: [
-      { id: 'a15', timestamp: '2026-03-15T09:00:00Z', action: 'Task started', agent: 'BuildForge' },
-      { id: 'a16', timestamp: '2026-03-18T17:00:00Z', action: 'Documentation completed', agent: 'BuildForge' },
+      { id: 'a15', timestamp: '2026-03-15T09:00:00Z', action: 'Task started', agent: 'buildforge' },
+      { id: 'a16', timestamp: '2026-03-18T17:00:00Z', action: 'Documentation completed', agent: 'buildforge' },
       { id: 'a17', timestamp: '2026-03-19T10:00:00Z', action: 'Marked as done', agent: 'EdgePilot' },
     ],
   },
@@ -379,15 +379,15 @@ export const tasks: Task[] = [
     id: 'task-12',
     title: 'Fix responsive layout issues',
     description: 'Address mobile layout problems on the main dashboard.',
-    assignedAgent: 'BuildForge',
+    assignedAgent: 'buildforge',
     priority: 'High',
     dueDate: '2026-03-20',
     project: 'Automation Systems',
     status: 'Review',
     activityLog: [
       { id: 'a20', timestamp: '2026-03-19T13:00:00Z', action: 'Bug reported', agent: 'EdgePilot' },
-      { id: 'a21', timestamp: '2026-03-20T10:00:00Z', action: 'Fix implemented', agent: 'BuildForge' },
-      { id: 'a22', timestamp: '2026-03-20T11:00:00Z', action: 'Ready for review', agent: 'BuildForge' },
+      { id: 'a21', timestamp: '2026-03-20T10:00:00Z', action: 'Fix implemented', agent: 'buildforge' },
+      { id: 'a22', timestamp: '2026-03-20T11:00:00Z', action: 'Ready for review', agent: 'buildforge' },
     ],
   },
 ];
@@ -746,7 +746,7 @@ export const workflows: Workflow[] = [
 ];
 
 export const recentActivities: ActivityItem[] = [
-  { id: 'act-1', timestamp: '2026-03-21T12:00:00Z', type: 'task', description: 'BuildForge completed Phase 1 of Mission Control dashboard', agent: 'BuildForge' },
+  { id: 'act-1', timestamp: '2026-03-21T12:00:00Z', type: 'task', description: 'BuildForge completed Phase 1 of Mission Control dashboard', agent: 'buildforge' },
   { id: 'act-2', timestamp: '2026-03-21T11:30:00Z', type: 'agent', description: 'DeepForge started market analysis session', agent: 'DeepForge' },
   { id: 'act-3', timestamp: '2026-03-21T10:00:00Z', type: 'task', description: 'ScriptForge submitted Episode 1 script for review', agent: 'ScriptForge' },
   { id: 'act-4', timestamp: '2026-03-21T09:30:00Z', type: 'workflow', description: 'Daily Market Data Sync completed successfully' },
@@ -755,7 +755,7 @@ export const recentActivities: ActivityItem[] = [
   { id: 'act-7', timestamp: '2026-03-21T07:00:00Z', type: 'system', description: 'Weekly Operations Report generated' },
   { id: 'act-8', timestamp: '2026-03-20T18:00:00Z', type: 'project', description: 'AI Tools project reached 60% completion' },
   { id: 'act-9', timestamp: '2026-03-20T16:00:00Z', type: 'task', description: 'DeepForge completed Prop Firm Comparison Matrix', agent: 'DeepForge' },
-  { id: 'act-10', timestamp: '2026-03-20T14:00:00Z', type: 'task', description: 'BuildForge updated Trading Systems Architecture doc', agent: 'BuildForge' },
+  { id: 'act-10', timestamp: '2026-03-20T14:00:00Z', type: 'task', description: 'BuildForge updated Trading Systems Architecture doc', agent: 'buildforge' },
 ];
 
 export const systemStatus: SystemStatus = {
@@ -875,4 +875,4 @@ export const decisionQueue: DecisionItem[] = [
 ];
 
 export const projects = ['$100 Revenue Sprint - Trading Products', 'Trading Systems', 'Trading Research', 'Content Engine', 'Automation Systems', 'SaaS MVPs', 'AI Tools'];
-export const agentNames = ['Chief Architect', 'EdgePilot', 'DeepForge', 'ScriptForge', 'GrowthForge', 'BuildForge', 'SignalForge', 'Haven'];
+export const agentNames = ['chief-architect', 'edgepilot', 'deepforge', 'scriptforge', 'growthforge', 'buildforge', 'signalforge', 'haven'];
