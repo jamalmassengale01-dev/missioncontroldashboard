@@ -141,6 +141,29 @@ export const agentRegistry: AgentConfig[] = [
     endpoint: '/api/agents/signalforge/run',
     status: 'idle',
   },
+  {
+    id: 'haven',
+    displayName: 'Haven',
+    role: 'Personal Life Executive Assistant',
+    description: 'Organizes and supports personal life, routines, family coordination, and life priorities',
+    capabilities: [
+      'Daily planning',
+      'Weekly planning',
+      'Personal organization',
+      'Habit tracking',
+      'Family coordination',
+      'Scheduling',
+      'Health routines',
+      'Education progress tracking',
+      'Retirement preparation',
+      'Reminders and checklists',
+      'Travel preparation',
+      'Stress reduction through structure'
+    ],
+    acceptedJobTypes: ['personal', 'family', 'health', 'scheduling', 'education', 'travel', 'routines', 'life_admin'],
+    endpoint: '/api/agents/haven/run',
+    status: 'idle',
+  },
 ];
 
 // Map job types to best-fit agents
@@ -174,6 +197,14 @@ export const jobTypeToAgentMap: Record<string, string[]> = {
   'plan_workflow': ['edgepilot'],
   'route_task': ['edgepilot'],
   'multi_step_workflow': ['edgepilot'],
+  'personal': ['haven'],
+  'family': ['haven'],
+  'health': ['haven'],
+  'scheduling': ['haven'],
+  'education': ['haven'],
+  'travel': ['haven'],
+  'routines': ['haven'],
+  'life_admin': ['haven'],
 };
 
 // Select best agent for a job type

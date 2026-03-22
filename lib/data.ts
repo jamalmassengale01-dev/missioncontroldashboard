@@ -106,6 +106,28 @@ export const agents: Agent[] = [
       'Viral content structures',
     ],
   },
+  {
+    id: 'haven',
+    name: 'Haven',
+    role: 'Personal Life',
+    status: 'idle',
+    currentFocus: 'Ready to assist with personal life organization',
+    lastActivity: 'Just now',
+    capabilities: [
+      'Daily planning',
+      'Weekly planning',
+      'Personal organization',
+      'Habit tracking',
+      'Family coordination',
+      'Scheduling',
+      'Health routines',
+      'Education progress tracking',
+      'Retirement preparation',
+      'Reminders and checklists',
+      'Travel preparation',
+      'Stress reduction through structure',
+    ],
+  },
 ];
 
 export const tasks: Task[] = [
@@ -742,4 +764,4 @@ export const decisionQueue: DecisionItem[] = [
 ];
 
 export const projects = ['Trading Systems', 'Trading Research', 'Content Engine', 'Automation Systems', 'SaaS MVPs', 'AI Tools'];
-export const agentNames = ['Chief Architect', 'EdgePilot', 'DeepForge', 'ScriptForge', 'GrowthForge', 'BuildForge', 'SignalForge'];
+export const agentNames = ['Chief Architect', 'EdgePilot', 'DeepForge', 'ScriptForge', 'GrowthForge', 'BuildForge', 'SignalForge', 'Haven'];

@@ -234,3 +234,6 @@ export interface AgentExecutionResponse {
   nextRecommendedAction?: string;
   timestamp: string;
 }
+
+// Personal job types for Haven
+export type PersonalJobType = 'personal' | 'family' | 'health' | 'scheduling' | 'education' | 'travel' | 'routines' | 'life_admin';
