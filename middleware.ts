@@ -10,8 +10,7 @@ const PROTECTED_PATHS = [
   '/api/audit',
   '/api/approvals',
   '/api/retry',
-  '/operations',
-  '/architect',
+  // /operations and /architect are intentionally public — no login required
 ];
 
 // Paths that are always public

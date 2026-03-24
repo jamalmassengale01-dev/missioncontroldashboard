@@ -26,7 +26,6 @@ const priorityVariants: Record<Task['priority'], 'default' | 'primary' | 'warnin
   Critical: 'danger',
 };
 
-// Map task to appropriate workflow based on assigned agent
 function getWorkflowForTask(task: Task): string | null {
   const agentWorkflowMap: Record<string, string> = {
     'DeepForge': 'research-viable-saas',
@@ -35,11 +34,10 @@ function getWorkflowForTask(task: Task): string | null {
     'BuildForge': 'plan-mvp-architecture',
     'SignalForge': 'create-social-hooks',
   };
-  
+
   return agentWorkflowMap[task.assignedAgent] || null;
 }
 
-// Map task to agent ID
 function getAgentIdForTask(task: Task): string {
   const agentMap: Record<string, string> = {
     'DeepForge': 'deepforge',
@@ -49,7 +47,7 @@ function getAgentIdForTask(task: Task): string {
     'SignalForge': 'signalforge',
     'EdgePilot': 'edgepilot',
   };
-  
+
   return agentMap[task.assignedAgent] || 'edgepilot';
 }
 
@@ -65,9 +63,8 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
     try {
       const workflowId = getWorkflowForTask(task);
       const agentId = getAgentIdForTask(task);
-      
+
       if (!workflowId) {
-        // Create ad-hoc workflow for tasks without matching workflow
         const run = workflowStore.createRun(
           {
             id: `task-${task.id}`,
@@ -81,26 +78,25 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
           { task: task.title, description: task.description },
           agentId
         );
-        
+
         setLastRunId(run.id);
         const response = await executeWorkflow(run.id);
         setRunStatus(response.success ? 'completed' : 'failed');
       } else {
-        // Use predefined workflow
         const definitions = getAllWorkflowDefinitions();
         const definition = definitions.find(d => d.id === workflowId);
-        
+
         if (definition) {
           const run = workflowStore.createRun(
             definition,
-            { 
+            {
               topic: task.title,
               targetAudience: task.project,
-              ...extractTaskInput(task)
+              ...extractTaskInput(task),
             },
             agentId
           );
-          
+
           setLastRunId(run.id);
           const response = await executeWorkflow(run.id);
           setRunStatus(response.success ? 'completed' : 'failed');
@@ -114,7 +110,6 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
     }
   };
 
-  // Extract relevant input from task based on assigned agent
   const extractTaskInput = (task: Task): Record<string, any> => {
     switch (task.assignedAgent) {
       case 'DeepForge':
@@ -132,7 +127,6 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
     }
   };
 
-  // Check for active runs
   React.useEffect(() => {
     if (lastRunId) {
       const run = workflowStore.getRun(lastRunId);
@@ -146,7 +140,8 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onDelete) {
+    if (!onDelete) return;
+    if (window.confirm(`Delete "${task.title}"? This cannot be undone.`)) {
       onDelete();
     }
   };
@@ -166,14 +161,14 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
               <h3 className="text-sm font-medium text-slate-200 line-clamp-2 group-hover:text-indigo-300 transition-colors">
                 {task.title}
               </h3>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1 flex-shrink-0">
                 <Badge variant={priorityVariants[task.priority]} size="sm">
                   {task.priority}
                 </Badge>
                 {onDelete && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={handleDelete}
                   >
@@ -182,17 +177,17 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
                 )}
               </div>
             </div>
-            
+
             <p className="text-xs text-slate-500 line-clamp-2 mb-3">
               {task.description}
             </p>
-            
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Avatar name={task.assignedAgent} size="sm" />
                 <span className="text-xs text-slate-400">{task.assignedAgent}</span>
               </div>
-              
+
               <div className="flex items-center gap-3 text-slate-500">
                 <div className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
@@ -206,16 +201,16 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
                 )}
               </div>
             </div>
-            
+
             <div className="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between">
               <Badge variant="default" className="text-xs">
                 {task.project}
               </Badge>
-              
+
               {canExecute && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
+                <Button
+                  variant="ghost"
+                  size="sm"
                   className="h-6 px-2"
                   onClick={handleExecute}
                   disabled={isExecuting}
@@ -232,7 +227,7 @@ export function TaskCard({ task, index, onClick, onDelete }: TaskCardProps) {
                     <Play className="w-3 h-3 text-indigo-400" />
                   )}
                   <span className="ml-1 text-xs">
-                    {isExecuting ? 'Running...' : 
+                    {isExecuting ? 'Running...' :
                      runStatus === 'completed' ? 'Done' :
                      runStatus === 'failed' ? 'Retry' :
                      runStatus === 'running' ? 'Running' :

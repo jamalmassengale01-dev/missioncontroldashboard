@@ -61,6 +61,10 @@ export default function TasksPage() {
     });
   };
 
+  const handleDeleteTask = (taskId: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  };
+
   return (
     <div className="flex h-screen bg-slate-950">
       <Sidebar />
@@ -103,6 +107,7 @@ export default function TasksPage() {
                 onTasksChange={setTasks}
                 onTaskClick={handleTaskClick}
                 onAddTask={handleAddTask}
+                onDeleteTask={handleDeleteTask}
               />
             </div>
           </div>

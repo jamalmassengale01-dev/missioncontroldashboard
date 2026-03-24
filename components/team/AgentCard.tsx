@@ -1,27 +1,36 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Agent } from '@/lib/types';
 import { Card } from '../ui/Card';
 import { Badge } from '../ui/Badge';
 import { Avatar } from '../ui/Avatar';
 import { Button } from '../ui/Button';
-import { Circle, Clock, AlertCircle, Power, MessageSquare, Activity, Plus } from 'lucide-react';
+import { Circle, Clock, AlertCircle, Power, Activity, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface AgentCardProps {
   agent: Agent;
   onAssignTask?: () => void;
+  onViewActivity?: () => void;
+  isShowingActivity?: boolean;
 }
 
-const statusConfig: Record<Agent['status'], { color: string; icon: React.ReactNode; label: string }> = {
+const statusConfig: Record<string, { color: string; icon: React.ReactNode; label: string }> = {
   idle: { color: 'bg-slate-500', icon: <Circle className="w-3 h-3" />, label: 'Idle' },
   working: { color: 'bg-emerald-500', icon: <Activity className="w-3 h-3" />, label: 'Working' },
   blocked: { color: 'bg-amber-500', icon: <AlertCircle className="w-3 h-3" />, label: 'Blocked' },
   offline: { color: 'bg-slate-700', icon: <Power className="w-3 h-3" />, label: 'Offline' },
+  running: { color: 'bg-amber-500', icon: <Activity className="w-3 h-3" />, label: 'Running' },
+  completed: { color: 'bg-emerald-500', icon: <Activity className="w-3 h-3" />, label: 'Completed' },
+  failed: { color: 'bg-red-500', icon: <AlertCircle className="w-3 h-3" />, label: 'Failed' },
 };
 
-export function AgentCard({ agent, onAssignTask }: AgentCardProps) {
-  const status = statusConfig[agent.status];
+export function AgentCard({ agent, onAssignTask, onViewActivity, isShowingActivity }: AgentCardProps) {
+  const status = statusConfig[agent.status] || statusConfig.idle;
+  const [showAllCaps, setShowAllCaps] = useState(false);
+
+  const visibleCaps = showAllCaps ? agent.capabilities : agent.capabilities.slice(0, 4);
+  const extraCount = agent.capabilities.length - 4;
 
   return (
     <Card className="p-5 h-full flex flex-col">
@@ -55,16 +64,31 @@ export function AgentCard({ agent, onAssignTask }: AgentCardProps) {
         <div>
           <p className="text-xs text-slate-500 uppercase tracking-wider mb-2">Capabilities</p>
           <ul className="space-y-1">
-            {agent.capabilities.slice(0, 4).map((capability, index) => (
+            {visibleCaps.map((capability, index) => (
               <li key={index} className="text-sm text-slate-400 flex items-start gap-2">
                 <span className="text-indigo-500 mt-1">•</span>
                 <span>{capability}</span>
               </li>
             ))}
-            {agent.capabilities.length > 4 && (
-              <li className="text-xs text-slate-500">+{agent.capabilities.length - 4} more</li>
-            )}
           </ul>
+          {extraCount > 0 && (
+            <button
+              onClick={() => setShowAllCaps(prev => !prev)}
+              className="mt-1.5 flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              {showAllCaps ? (
+                <>
+                  <ChevronUp className="w-3 h-3" />
+                  Show less
+                </>
+              ) : (
+                <>
+                  <ChevronDown className="w-3 h-3" />
+                  +{extraCount} more
+                </>
+              )}
+            </button>
+          )}
         </div>
       </div>
 
@@ -73,12 +97,16 @@ export function AgentCard({ agent, onAssignTask }: AgentCardProps) {
           <Plus className="w-3 h-3 mr-1" />
           Assign Task
         </Button>
-        <Button variant="ghost" size="sm">
-          <MessageSquare className="w-3 h-3" />
-        </Button>
-        <Button variant="ghost" size="sm">
-          <Activity className="w-3 h-3" />
-        </Button>
+        {onViewActivity && (
+          <Button
+            variant={isShowingActivity ? 'primary' : 'ghost'}
+            size="sm"
+            onClick={onViewActivity}
+            title="View recent runs"
+          >
+            <Activity className="w-3 h-3" />
+          </Button>
+        )}
       </div>
     </Card>
   );

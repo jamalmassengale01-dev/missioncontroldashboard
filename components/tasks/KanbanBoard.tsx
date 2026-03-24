@@ -10,16 +10,17 @@ interface KanbanBoardProps {
   onTasksChange: (tasks: Task[]) => void;
   onTaskClick: (task: Task) => void;
   onAddTask: (column: ColumnType) => void;
+  onDeleteTask: (taskId: string) => void;
 }
 
 const columns: ColumnType[] = ['Backlog', 'In Progress', 'Review', 'Done'];
 
-export function KanbanBoard({ tasks, onTasksChange, onTaskClick, onAddTask }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onTasksChange, onTaskClick, onAddTask, onDeleteTask }: KanbanBoardProps) {
   const handleDragEnd = (result: DropResult) => {
     if (!result.destination) return;
 
     const { source, destination } = result;
-    
+
     if (source.droppableId === destination.droppableId && source.index === destination.index) {
       return;
     }
@@ -59,6 +60,7 @@ export function KanbanBoard({ tasks, onTasksChange, onTaskClick, onAddTask }: Ka
             tasks={tasks.filter((t) => t.status === column)}
             onTaskClick={onTaskClick}
             onAddTask={onAddTask}
+            onDeleteTask={onDeleteTask}
           />
         ))}
       </div>
